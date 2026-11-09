@@ -26,6 +26,7 @@ const connectedClient = await connectToMongoDB();
 const database = connectedClient.db("hireloopdb");
 const users = database.collection("user");
 const jobs = database.collection("jobs");
+const applications = database.collection("applications");
 
 app.get('/', (req, res) => {
     res.send('hire loop is looping')
@@ -69,6 +70,13 @@ app.get('/jobs', async (req, res) => {
     res.send(result);
 })
 
+app.get(`/jobs/:id`, async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+    const result = await jobs.findOne(query);
+    res.send(result);
+})
+
 
 app.post('/jobs', async (req, res) => {
     const job = req.body;
@@ -81,6 +89,14 @@ app.delete('/jobs/:id', async (req, res) => {
     const id = req.params.id;
     const query = { _id: new ObjectId(id) };
     const result = await jobs.deleteOne(query);
+    res.send(result);
+})
+
+
+// applications related apis
+app.post('/applications', async (req, res) => {
+    const application = req.body;
+    const result = await applications.insertOne(application);
     res.send(result);
 })
 
