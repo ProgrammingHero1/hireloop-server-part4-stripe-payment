@@ -96,16 +96,22 @@ app.delete('/jobs/:id', async (req, res) => {
 // applications related apis
 
 app.get('/applications', async (req, res) => {
-
     const query = {};
-
     if (req.query.applicantId) {
         query.userId = req.query.applicantId;
     }
-
     const cursor = applications.find(query);
     const result = await cursor.toArray();
     res.send(result);
+})
+
+app.get('/applications/count', async (req, res) => {
+    const query = {};
+    if (req.query.applicantId) {
+        query.userId = req.query.applicantId;
+    }
+    const result = await applications.countDocuments(query);
+    res.send({ count: result });
 })
 
 app.post('/applications', async (req, res) => {
