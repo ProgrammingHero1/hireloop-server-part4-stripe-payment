@@ -36,10 +36,17 @@ app.get('/', (req, res) => {
     res.send('hire loop is looping')
 })
 
-
+// users related apis
 app.get('/users', async (req, res) => {
     const cursor = users.find({});
     const result = await cursor.toArray();
+    res.send(result);
+})
+
+app.get('/users/:id/premium', async(req, res) =>{
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) };
+    const result = await users.findOne(query, { projection: { premium: 1 } });
     res.send(result);
 })
 
@@ -127,6 +134,11 @@ app.post('/applications', async (req, res) => {
 // payments related apis
 app.post('/payments/checkout-verify', async (req, res) => {
     const { sessionId } = req.body;
+
+    if (!sessionId) {
+        return res.send({ success: false, message: 'Session ID is required' });
+    }
+
     const {
         status,
         payment_status,
@@ -141,6 +153,12 @@ app.post('/payments/checkout-verify', async (req, res) => {
     // 4. update user information as premium user
 
     if (status === 'complete' && payment_status === 'paid') {
+
+        const sessionQuery = { sessionId };
+        const existingPayment = await payments.findOne(sessionQuery);
+        if (existingPayment) {
+            return res.send({ success: false, message: 'Payment already verified' });
+        }
         const payment = {
             sessionId,
             status,
